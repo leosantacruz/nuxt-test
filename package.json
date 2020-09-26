@@ -6,9 +6,9 @@
     "node": "12.x"
   },
   "scripts": {
-    "dev": "nuxt --port 8080",
+    "dev": "nuxt",
     "build": "nuxt build",
-    "start": "nuxt start --port 8080",
+    "start": "nuxt start",
     "generate": "nuxt generate"
   },
   "dependencies": {
