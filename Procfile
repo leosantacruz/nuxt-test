@@ -1,1 +1,1 @@
-web: yarn run dev
+web: nuxt build
