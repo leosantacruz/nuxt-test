@@ -31,10 +31,5 @@ export default {
   modules: ["@nuxtjs/axios"],
 
   // Build Configuration (https://go.nuxtjs.dev/config-build)
-  build: {},
-
-  server: {
-    port: 11578, // default: 3000
-    host: "0.0.0.0" // default: localhost
-  }
+  build: {}
 };
