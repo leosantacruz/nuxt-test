@@ -7,9 +7,10 @@
   },
   "scripts": {
     "dev": "nuxt",
-    "build": "nuxt build -p 80",
-    "start": "nuxt start -p 80",
-    "generate": "nuxt generate"
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate",
+    "heroku-postbuild": "npm run build"
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.12.2",
@@ -19,3 +20,5 @@
   },
   "devDependencies": {}
 }
+
+
