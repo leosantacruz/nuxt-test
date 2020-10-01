@@ -14,7 +14,6 @@
         @dragging="onDrag"
         @resizing="onResize"
         :parent="true"
-        :aspectRatio="true"
       >
         <svg
           version="1.1"
