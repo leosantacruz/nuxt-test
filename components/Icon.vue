@@ -1,12 +1,13 @@
 <template>
-  <component v-bind:is="dynamicComponent"></component>
+  <component v-bind:is="dynamicComponent" :x="$props.x" :y="y"></component>
 </template>
 <script>
 export default {
-  props: ["id", "type"],
+  props: ["id", "type", "x", "y"],
   components: {
     World: () => import("@/components/Icons/World"),
     Rocket: () => import("@/components/Icons/Rocket"),
+    Banana: () => import("@/components/Icons/Banana"),
   },
 
   computed: {
