@@ -1,8 +1,14 @@
 <template>
   <div>
-    <button @click="addItem()">Add new object</button>
+    <button @click="addItem('World')">Add new world</button>
+    <button @click="addItem('Rocket')">Add new rocket</button>
     <div id="container">
-      <World v-for="item in items" :key="item" />
+      <Icon
+        v-for="item in items"
+        :type="item.type"
+        :id="item.id"
+        :key="item.id"
+      />
     </div>
   </div>
 </template>
@@ -28,10 +34,13 @@ export default {
     };
   },
   methods: {
-    addItem() {
+    addItem(type) {
       let id = new Date().getUTCMilliseconds();
 
-      this.items.push(id);
+      this.items.push({
+        id: id,
+        type: type,
+      });
     },
     onResize: function (x, y, width, height) {
       this.x = x;
