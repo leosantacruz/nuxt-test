@@ -6,7 +6,10 @@
     <button @click="addCircle()">Add circle</button>
     <button @click="addRect()">Add rect</button>
     <button @click="groupSelection()">Group selection</button>
-    <button @click="cloneObject()">Clone object</button>
+    <button @click="cloneObject()">Clone selection</button>
+    <button @click="deleteSelection()">Delete selection</button>
+    <button @click="convertToMask()">Convert to mask</button>
+    <button @click="clippingMask()">Clipping mask</button>
 
     <canvas ref="can" width="800" height="500"></canvas>
   </div>
@@ -53,11 +56,11 @@ export default {
       this.top = e.target.top;
     },
     groupSelection() {
+      this.canvas.add(this.groupObjects());
+    },
+    groupObjects() {
       var copiedObjects = [];
-      var selection =
-        this.canvas.getActiveObject() == null
-          ? this.canvas.getActiveGroup()
-          : this.canvas.getActiveObject();
+      let selection = this.getSelection();
 
       //console.log(selection._objects);
 
@@ -78,17 +81,18 @@ export default {
             c.setCoords();
             itemGroup.push(c);
           });
+          this.canvas.remove(object);
         });
         console.log(itemGroup);
         let newGroup = new fabric.Group(itemGroup);
-        this.canvas.add(newGroup);
+        return newGroup;
 
         //ONE ITEM
       } else {
         selection.clone((c) => {
           c.set("canvas", this.canvas);
           c.setCoords();
-          this.canvas.add(c);
+          return c;
         });
       }
     },
@@ -98,13 +102,7 @@ export default {
       //this.canvas.add(this.canvas.getObjects()[0]);
     },
     cloneObject() {
-      var copiedObjects = [];
-      var selection =
-        this.canvas.getActiveObject() == null
-          ? this.canvas.getActiveGroup()
-          : this.canvas.getActiveObject();
-
-      //console.log(selection._objects);
+      let selection = this.getSelection();
 
       //If multiple items are selected the activeGroups will be true
       if (selection._objects) {
@@ -112,7 +110,6 @@ export default {
         selection._objects.forEach((object) => {
           let l = object.left;
           let t = object.top;
-          console.log(selection);
           object.clone((c) => {
             c.set({
               left: selection.left + l,
@@ -132,37 +129,82 @@ export default {
         });
       }
     },
-    acloneObject() {
-      var group =
-        this.canvas.getActiveObject() == null
-          ? this.canvas.getActiveGroup()
-          : this.canvas.getActiveObject();
+    getSelection() {
+      return this.canvas.getActiveObject() == null
+        ? this.canvas.getActiveGroup()
+        : this.canvas.getActiveObject();
+    },
+    deleteSelection() {
+      let selection = this.getSelection();
 
-      group.clone((c) => {
-        //console.log(c);
-        var cloned = c._objects;
-
-        var item1 = cloned[0].set({
-          left: 0,
-          top: 0,
-          fill: "red",
-          originX: "center",
-          originaY: "center",
+      if (selection._objects && selection.dirty) {
+        selection._objects.forEach((o) => {
+          this.canvas.remove(o);
         });
-        item1.setCoords();
-        this.canvas.add(item1);
-        this.canvas.requestRenderAll();
-        //this.canvas.add(item);
-        // cloned.forEach((item) => {
-        //   item.set({
-        //     left: item.left + 10,
-        //     top: item.top + 10,
-        //     // evented: true,
-        //   });
-        //   this.canvas.add(item);
-        // });
-        //this.canvas.requestRenderAll();
+      } else {
+        this.canvas.remove(selection);
+      }
+    },
+    convertToMask() {
+      let selection = this.getSelection();
+      if (selection._objects) {
+        selection._objects.forEach((o) => {
+          o.set({
+            fill: "rgba(255,0,0,0.3)",
+            stroke: "red",
+            strokeWidth: 1,
+          });
+        });
+      } else {
+        selection.set({
+          fill: "rgba(255,0,0,0.3)",
+          stroke: "red",
+          strokeWidth: 1,
+        });
+      }
+      this.canvas.requestRenderAll();
+    },
+    clippingMask() {
+      let selection = this.getSelection();
+
+      /*   selection.clone((c) => {
+        c.set({
+          clipPath: new fabric.Circle({
+            radius: 100,
+            left: 100,
+            top: 100,
+            originX: "center",
+            originY: "center",
+          }),
+        });
+
+        c.set("canvas", this.canvas);
+        c.setCoords();
+
+     
+
+        this.canvas.add(c);
       });
+      */
+
+      let circle = new fabric.Circle({
+        radius: 100,
+        left: 0,
+        top: 0,
+      });
+
+      let newgroup = this.groupObjects();
+      circle = newgroup._objects[0];
+      newgroup.clipPath = circle;
+      this.canvas.add(newgroup);
+      //selection._objects[0].clipPath = selection._objects[1];
+      //this.canvas.add(selection);
+      // this.canvas.requestRenderAll();
+    },
+    randomColor() {
+      return (
+        "#" + ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, "0")
+      );
     },
   },
 };
