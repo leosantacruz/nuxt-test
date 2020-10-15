@@ -3,15 +3,13 @@ function bazierCurve(canvas) {
   fabric.Object.prototype.originX = fabric.Object.prototype.originY = "center";
 
   canvas.on({
-    // "object:selected": onObjectSelected,
     "object:moving": onObjectMoving
-    // "before:selection:cleared": onBeforeSelectionCleared,
   });
 
   (function drawQuadratic() {
     var line = new fabric.Path("M 65 0 Q 100, 100, 200, 0", {
       fill: "",
-      stroke: "black",
+      stroke: "red",
       objectCaching: false
     });
 
@@ -24,7 +22,7 @@ function bazierCurve(canvas) {
     line.path[1][3] = 300;
     line.path[1][4] = 100;
 
-    line.selectable = false;
+    line.selectable = true;
     canvas.add(line);
 
     var p1 = makeCurvePoint(200, 200, null, line, null);

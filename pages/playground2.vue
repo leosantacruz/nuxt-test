@@ -5,11 +5,12 @@
     <button @click="addElements()">Add bezier curve</button>
     <button @click="addCircle()">Add circle</button>
     <button @click="addRect()">Add rect</button>
-    <button @click="groupSelection()">Group selection</button>
+    <button v-if="isGroup" @click="groupSelection()">Group selection</button>
     <button @click="cloneObject()">Clone selection</button>
     <button @click="deleteSelection()">Delete selection</button>
     <button @click="convertToMask()">Convert to mask</button>
     <button @click="clippingMask()">Clipping mask</button>
+    <button @click="drawLines = true">Draw lines</button>
 
     <canvas ref="can" width="800" height="500"></canvas>
   </div>
@@ -28,6 +29,8 @@ export default {
     return {
       canvas: {},
       top: 0,
+      isGroup: false,
+      drawLines: false,
     };
   },
   mounted() {
@@ -40,6 +43,43 @@ export default {
     this.canvas.on({
       "object:moved": this.mouseDown,
       "selection:created": this.selectObject,
+      "selection:cleared": this.unSelectObject,
+    });
+
+    var line, isDown;
+
+    this.canvas.on("mouse:down", (o) => {
+      isDown = true;
+      var pointer = this.canvas.getPointer(o.e);
+      var points = [pointer.x, pointer.y, pointer.x, pointer.y];
+
+      if (this.drawLines) {
+        line = new fabric.Line(points, {
+          strokeWidth: 5,
+          fill: "blue",
+          stroke: "red",
+          originX: "center",
+          originY: "center",
+          selectable: true,
+          targetFindTolerance: true,
+        });
+        this.canvas.add(line);
+      }
+    });
+
+    this.canvas.on("mouse:move", (o) => {
+      if (!isDown) return;
+      var pointer = this.canvas.getPointer(o.e);
+
+      if (this.drawLines) {
+        line.set({ x2: pointer.x, y2: pointer.y });
+        this.canvas.renderAll();
+      }
+    });
+
+    this.canvas.on("mouse:up", (o) => {
+      isDown = false;
+      this.drawLines = false;
     });
   },
   methods: {
@@ -82,6 +122,7 @@ export default {
             itemGroup.push(c);
           });
           this.canvas.remove(object);
+          this.isGroup = true;
         });
         console.log(itemGroup);
         let newGroup = new fabric.Group(itemGroup);
@@ -92,14 +133,22 @@ export default {
         selection.clone((c) => {
           c.set("canvas", this.canvas);
           c.setCoords();
+          this.isGroup = false;
           return c;
         });
       }
     },
     selectObject(e) {
-      //console.log(this.canvas.getObjects());
-      //this.canvas.getObjects()[0].set({ top: 0 });
-      //this.canvas.add(this.canvas.getObjects()[0]);
+      this.isGroup = false;
+
+      let selection = this.getSelection();
+
+      if (selection._objects) {
+        this.isGroup = true;
+      }
+    },
+    unSelectObject(e) {
+      this.isGroup = false;
     },
     cloneObject() {
       let selection = this.getSelection();
@@ -167,7 +216,7 @@ export default {
     clippingMask() {
       let selection = this.getSelection();
 
-      /*   selection.clone((c) => {
+      selection.clone((c) => {
         c.set({
           clipPath: new fabric.Circle({
             radius: 100,
@@ -181,22 +230,19 @@ export default {
         c.set("canvas", this.canvas);
         c.setCoords();
 
-     
-
         this.canvas.add(c);
       });
-      */
 
-      let circle = new fabric.Circle({
-        radius: 100,
-        left: 0,
-        top: 0,
-      });
+      // let circle = new fabric.Circle({
+      //   radius: 100,
+      //   left: 0,
+      //   top: 0,
+      // });
 
-      let newgroup = this.groupObjects();
-      circle = newgroup._objects[0];
-      newgroup.clipPath = circle;
-      this.canvas.add(newgroup);
+      // let newgroup = this.groupObjects();
+      // circle = newgroup._objects[0];
+      //newgroup.clipPath = circle;
+      //this.canvas.add(newgroup);
       //selection._objects[0].clipPath = selection._objects[1];
       //this.canvas.add(selection);
       // this.canvas.requestRenderAll();
