@@ -12,7 +12,23 @@
     <button @click="clippingMask()">Clipping mask</button>
     <button @click="drawLines = true">Draw lines</button>
 
-    <canvas ref="can" width="800" height="500"></canvas>
+    <div id="container">
+      <canvas width="800" height="500" ref="can"></canvas>
+    </div>
+
+    Drawing: <input id="mode" type="checkbox" checked /><br />
+    Color: <input id="color" type="color" value="#ff0000" /><br />
+    Brush size:
+    <input id="size" type="range" min="1" max="100" step="1" value="20" /><br />
+    Brush opacity:
+    <input
+      id="opacity"
+      type="number"
+      min="0"
+      max="1"
+      step="0.1"
+      value="0.5"
+    /><br />
   </div>
 </template>
 
@@ -23,6 +39,7 @@ import { bazierCurve } from "../methods/Figures/bazier.js";
 import { clipPath } from "../methods/Figures/clipPath.js";
 import { circle } from "../methods/Figures/circle.js";
 import { rect } from "../methods/Figures/rect.js";
+import { brush } from "../methods/Figures/brush.js";
 
 export default {
   data: function () {
@@ -40,6 +57,14 @@ export default {
     fabric.Object.prototype.originX = fabric.Object.prototype.originY =
       "center";
 
+    brush(this.canvas);
+
+    //BACKGROUND COLOR
+    /*this.canvas.backgroundImage =
+      "https://edsurge.imgix.net/uploads/post/image/12528/blueprint-1566350497.jpg?auto=compress%2Cformat&w=640&h=260&fit=crop";
+    this.canvas.renderAll();
+*/
+
     this.canvas.on({
       "object:moved": this.mouseDown,
       "selection:created": this.selectObject,
@@ -54,6 +79,7 @@ export default {
       var points = [pointer.x, pointer.y, pointer.x, pointer.y];
 
       if (this.drawLines) {
+        console.log("drawing...");
         line = new fabric.Line(points, {
           strokeWidth: 5,
           fill: "blue",
@@ -262,5 +288,11 @@ body {
 }
 canvas {
   border: 1px solid red;
+  width: 800px;
+  height: 500px;
+}
+#container {
+  width: 800px;
+  height: 500px;
 }
 </style>
