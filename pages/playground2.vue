@@ -1,6 +1,9 @@
 <template>
   <div id="playground">
     <h1>Actarea - Playground</h1>
+    <br />
+    <hr />
+    <br />
 
     <button @click="addElements()">Add bezier curve</button>
     <button @click="addCircle()">Add circle</button>
@@ -40,6 +43,7 @@ import { clipPath } from "../methods/Figures/clipPath.js";
 import { circle } from "../methods/Figures/circle.js";
 import { rect } from "../methods/Figures/rect.js";
 import { brush } from "../methods/Figures/brush.js";
+import { polygons } from "../methods/Figures/polygons.js";
 
 export default {
   data: function () {
@@ -58,6 +62,7 @@ export default {
       "center";
 
     brush(this.canvas);
+    polygons(this.canvas);
 
     //BACKGROUND COLOR
     /*this.canvas.backgroundImage =
