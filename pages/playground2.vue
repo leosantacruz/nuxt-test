@@ -1,37 +1,87 @@
 <template>
   <div id="playground">
-    <h1>Actarea - Playground</h1>
-    <br />
-    <hr />
-    <br />
+    <div class="container-fluid">
+      <h2>Actarea</h2>
+      <h5>Playground</h5>
+      <hr />
+      <div class="row">
+        <div class="col-sm-3">
+          <h5>Creation</h5>
+          <button class="btn btn-primary btn-block btn-sm" @click="addCircle()">
+            Add circle
+          </button>
+          <button class="btn btn-primary btn-block btn-sm" @click="addRect()">
+            Add rect
+          </button>
+          <button class="btn btn-primary btn-block btn-sm" @click="drawBrush()">
+            Brush:
+            <span v-if="brushStatus">On</span>
+            <span v-else>Off</span>
+          </button>
+          <button
+            class="btn btn-primary btn-block btn-sm"
+            @click="drawPolygons()"
+          >
+            Polygons
+          </button>
+          <button class="btn btn-primary btn-block btn-sm" @click="drawLines()">
+            Lines
+          </button>
+          <button
+            class="btn btn-primary btn-block btn-sm"
+            @click="addElements()"
+          >
+            Add bezier curve
+          </button>
+          <hr />
+          <div class="form-group">
+            <label for="">Background image</label>
+            <input type="text" v-model="backgroundUrl" class="form-control" />
+          </div>
 
-    <button @click="addElements()">Add bezier curve</button>
-    <button @click="addCircle()">Add circle</button>
-    <button @click="addRect()">Add rect</button>
-    <button v-if="isGroup" @click="groupSelection()">Group selection</button>
-    <button @click="cloneObject()">Clone selection</button>
-    <button @click="deleteSelection()">Delete selection</button>
-    <button @click="convertToMask()">Convert to mask</button>
-    <button @click="clippingMask()">Clipping mask</button>
-    <button @click="drawLines = true">Draw lines</button>
-
-    <div id="container">
-      <canvas width="800" height="500" ref="can"></canvas>
+          <h5>Manipulation</h5>
+          <button
+            class="btn btn-secondary btn-block btn-sm"
+            v-if="isGroup"
+            @click="groupSelection()"
+          >
+            Group selection
+          </button>
+          <button
+            class="btn btn-secondary btn-block btn-sm"
+            @click="cloneObject()"
+          >
+            Clone selection
+          </button>
+          <button
+            class="btn btn-secondary btn-block btn-sm"
+            @click="deleteSelection()"
+          >
+            Delete selection
+          </button>
+          <button
+            class="btn btn-secondary btn-block btn-sm"
+            @click="convertToMask()"
+          >
+            Convert to mask
+          </button>
+          <button
+            class="btn btn-secondary btn-block btn-sm"
+            @click="clippingMask()"
+          >
+            Clipping mask
+          </button>
+        </div>
+        <div class="col-sm-8">
+          <div
+            id="canvasContainer"
+            :style="{ backgroundImage: `url(${backgroundUrl})` }"
+          >
+            <canvas width="800" height="500" ref="can"></canvas>
+          </div>
+        </div>
+      </div>
     </div>
-
-    Drawing: <input id="mode" type="checkbox" checked /><br />
-    Color: <input id="color" type="color" value="#ff0000" /><br />
-    Brush size:
-    <input id="size" type="range" min="1" max="100" step="1" value="20" /><br />
-    Brush opacity:
-    <input
-      id="opacity"
-      type="number"
-      min="0"
-      max="1"
-      step="0.1"
-      value="0.5"
-    /><br />
   </div>
 </template>
 
@@ -39,6 +89,7 @@
 <script>
 import { fabric } from "fabric";
 import { bazierCurve } from "../methods/Figures/bazier.js";
+import { line } from "../methods/Figures/line.js";
 import { clipPath } from "../methods/Figures/clipPath.js";
 import { circle } from "../methods/Figures/circle.js";
 import { rect } from "../methods/Figures/rect.js";
@@ -51,7 +102,9 @@ export default {
       canvas: {},
       top: 0,
       isGroup: false,
-      drawLines: false,
+      brushStatus: false,
+      backgroundUrl:
+        "https://img.freepik.com/vector-gratis/fondo-pintura-acuarela-rosa-vibrante_53876-58930.jpg?size=626&ext=jpg",
     };
   },
   mounted() {
@@ -61,56 +114,10 @@ export default {
     fabric.Object.prototype.originX = fabric.Object.prototype.originY =
       "center";
 
-    brush(this.canvas);
-    polygons(this.canvas);
-
-    //BACKGROUND COLOR
-    /*this.canvas.backgroundImage =
-      "https://edsurge.imgix.net/uploads/post/image/12528/blueprint-1566350497.jpg?auto=compress%2Cformat&w=640&h=260&fit=crop";
-    this.canvas.renderAll();
-*/
-
     this.canvas.on({
       "object:moved": this.mouseDown,
       "selection:created": this.selectObject,
       "selection:cleared": this.unSelectObject,
-    });
-
-    var line, isDown;
-
-    this.canvas.on("mouse:down", (o) => {
-      isDown = true;
-      var pointer = this.canvas.getPointer(o.e);
-      var points = [pointer.x, pointer.y, pointer.x, pointer.y];
-
-      if (this.drawLines) {
-        console.log("drawing...");
-        line = new fabric.Line(points, {
-          strokeWidth: 5,
-          fill: "blue",
-          stroke: "red",
-          originX: "center",
-          originY: "center",
-          selectable: true,
-          targetFindTolerance: true,
-        });
-        this.canvas.add(line);
-      }
-    });
-
-    this.canvas.on("mouse:move", (o) => {
-      if (!isDown) return;
-      var pointer = this.canvas.getPointer(o.e);
-
-      if (this.drawLines) {
-        line.set({ x2: pointer.x, y2: pointer.y });
-        this.canvas.renderAll();
-      }
-    });
-
-    this.canvas.on("mouse:up", (o) => {
-      isDown = false;
-      this.drawLines = false;
     });
   },
   methods: {
@@ -278,6 +285,16 @@ export default {
       //this.canvas.add(selection);
       // this.canvas.requestRenderAll();
     },
+    drawPolygons() {
+      polygons(this.canvas);
+    },
+    drawBrush() {
+      this.brushStatus = !this.brushStatus;
+      brush(this.canvas, this.brushStatus);
+    },
+    drawLines() {
+      line(this.canvas, true);
+    },
     randomColor() {
       return (
         "#" + ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, "0")
@@ -288,16 +305,15 @@ export default {
 </script>
 
 <style>
-body {
-  background-color: #fff;
-}
-canvas {
-  border: 1px solid red;
+#canvasContainer canvas {
+  border: 1px solid gray;
   width: 800px;
   height: 500px;
 }
-#container {
+#canvasContainer {
   width: 800px;
   height: 500px;
+
+  background-size: cover;
 }
 </style>
