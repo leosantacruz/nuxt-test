@@ -10,7 +10,7 @@ function line(canvas, drawLinesStatus) {
       line = new fabric.Line(points, {
         strokeWidth: 5,
         fill: "blue",
-        stroke: "red",
+        stroke: "gray",
         originX: "center",
         originY: "center",
         selectable: true,
